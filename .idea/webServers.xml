@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="dc5af666-f098-4cd7-a855-5b0f534fcd70" name="GAMING-PC">
+        <fileTransfer rootFolder="/C:/Users/nansp/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup" accessType="SFTP" host="192.168.1.30" port="22" sshConfigId="011e9283-3d42-43ef-b365-b07e7d6a660a" sshConfig="nans.plancher@gmail.com@192.168.1.30:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

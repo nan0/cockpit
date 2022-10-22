@@ -12,13 +12,14 @@
   - Install requirements:
   - on Pi: : sudo python3 -m pip install -r /home/nan0/cockpit/requirements.txt
   - Python venv tuto [here](https://www.javatpoint.com/how-to-create-requirements-txt-file-in-python)
+  - Mayb try [PyWebOSTV](https://github.com/supersaiyanmode/PyWebOSTV) to control TVs
 
 ## Pi Configuration
 - python client located in /home/nan0/cockpit/cockpit.py (with wol byte file alongside)
 - A systemd service starts automatically with the pi
  - location /etc/systemd/system/cockpit.service
  - usage : sudo systemctl [start | stop | restart] cockpit.service
- - log: journalctl -f (ctrl+c to exit)
+ - log: journalctl -f -u cockpit.service -p info (ctrl+c to exit)
  - if service file is updated, run : sudo systemctl daemon-reload
  - Systemd tuto [here](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267)
 
@@ -32,4 +33,4 @@
 | Command     | Description        |
 |-------------|--------------------|
 | START_MSFS  | *Starts MSFS*      |
-| SHUTDOWN_PC | *Shutdowns the PC* |
+| STOP_PC | *Shutdowns the PC* |

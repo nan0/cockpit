@@ -1,42 +1,37 @@
+import asyncio
+import logging
+import multiprocessing
+import time
 import RPi.GPIO as GPIO
 import broadlink
-import multiprocessing
-import socketio
-import time
+import websockets
 from wakeonlan import send_magic_packet
-import logging
+
+TV_LED = 17
+TV_BTN = 2
+PC_LED = 27
+PC_BTN = 3
+MSFS_LED = 22
+MSFS_BTN = 4
+WS_URL = "ws://192.168.1.30:8765"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(2, GPIO.IN)
-GPIO.setup(3, GPIO.IN)
-GPIO.setup(4, GPIO.IN)
-GPIO.setup(17, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(27, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(22, GPIO.OUT, initial=GPIO.LOW)
-
-sio = socketio.Client()
-wsUrl = "http://192.168.1.30:8765"
+GPIO.setup(TV_BTN, GPIO.IN)
+GPIO.setup(PC_BTN, GPIO.IN)
+GPIO.setup(MSFS_BTN, GPIO.IN)
+GPIO.setup(TV_LED, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(PC_LED, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(MSFS_LED, GPIO.OUT, initial=GPIO.LOW)
 
 logging.basicConfig(level=logging.INFO)
 
-@sio.event
-def connect():
-    toggleLed(27, True)
 
-@sio.event
-def connect_error(data):
-    toggleLed(27, False)
-    sio.connect(wsUrl)
+# Toggles the tv on or off
+def toggle_tv(channel):
+    logging.info("Connecting to the broadlink mini...")
+    blink_led(TV_LED)
 
-
-@sio.event
-def disconnect():
-    toggleLed(27, False)
-
-
-# Switches the tv on or off
-def switchTV():
     # Broadlink RM3 mini connexion
     device = broadlink.hello('192.168.1.15')
     device.auth()
@@ -44,68 +39,61 @@ def switchTV():
         packet = f.read()
     device.send_data(packet)
 
-
-# Wakes up the gaming pc
-def wakeUpPC():
-    blinkProc = multiprocessing.Process(target=infiniteBlink, args=(27,))
-    blinkProc.start()
-    macAddr = '50:EB:F6:94:53:01'
-    send_magic_packet(macAddr)
-    sio.connect(wsUrl)
-    blinkProc.terminate()
+    logging.info("TV toggled !")
 
 
-# Toggles the pc led on or off
-def toggleLed(num, on):
-    if on:
-        GPIO.output(num, GPIO.HIGH)
+# Toggles the PC on or off
+def toggle_pc(channel):
+    blink_led(PC_LED)
+    logging.info("Checking the PC power status...")
+    is_up = asyncio.run(send_message('DUMMY'))
+    if not is_up:
+        logging.info("PC is off. Starting it...")
+        blink_led(PC_LED, 1)
+        mac_addr = '50:EB:F6:94:53:01'
+        send_magic_packet(mac_addr)
     else:
-        GPIO.output(num, GPIO.LOW)
+        logging.info("PC is on. Stopping it...")
+        blink_led(PC_LED, 1)
+        asyncio.run(send_message('STOP_PC'))
 
 
-# Blinks a led
-def blinkLed(num, duration=0.2):
-    for i in range(3):
-        toggleLed(num, True)
-        time.sleep(duration)
-        toggleLed(num, False)
-        time.sleep(duration)
+# Sends a message to make the server toggle MSFS
+def toggle_msfs(channel):
+    logging.info('Will toggle MSFS')
+    blink_led(MSFS_LED)
+    asyncio.run(send_message('TOGGLE_MSFS'))
 
 
-# Blinks a led infinitly
-def infiniteBlink(num):
-    while True:
-        blinkLed(num, 0.05)
+# Blinks LED in another process (doesn't block the main thread)
+def blink_led(num, duration=0.1):
+    def blink_sync(num, duration=0.1):
+        for i in range(3):
+            GPIO.output(num, GPIO.HIGH)
+            time.sleep(duration)
+            GPIO.output(num, GPIO.LOW)
+            time.sleep(duration)
+
+    blink_proc = multiprocessing.Process(target=blink_sync, args=(num, duration))
+    blink_proc.start()
 
 
-# Watching for board I/O
-def main():
-    while True:
-        tvBtnState = GPIO.input(2)
-        pcBtnState = GPIO.input(3)
-        msfsBtnState = GPIO.input(4)
-
-        if not tvBtnState:
-            blinkLed(17)
-            switchTV()
-            logging.info("Flight simulator TV switched !")
-        if not pcBtnState:
-            if not sio.connected:
-                proc = multiprocessing.Process(target=wakeUpPC)
-                proc.start()
-            else:
-                blinkLed(27)
-                toggleLed(27, True)
-                sio.emit('STOP_PC')
-                logging.info("Flight simulator PC shut down !")
-        if not msfsBtnState:
-            logging.info('Will start MSFS')
-
-            blinkLed(22)
-            sio.emit('START_MSFS')
-        time.sleep(0.1)
+# Sends a message to the server via the websocket
+async def send_message(message):
+    try:
+        async with websockets.connect(WS_URL, open_timeout=2, close_timeout=1) as websocket:
+            await websocket.send(message)
+            print('DONE ')
+            return True
+    except:
+        print('ERROR ')
+        return False
 
 
 # Main
 if __name__ == "__main__":
-    main()
+    GPIO.add_event_detect(TV_BTN, GPIO.FALLING, callback=toggle_tv, bouncetime=1000)
+    GPIO.add_event_detect(PC_BTN, GPIO.FALLING, callback=toggle_pc, bouncetime=1000)
+    GPIO.add_event_detect(MSFS_BTN, GPIO.FALLING, callback=toggle_msfs, bouncetime=1000)
+    while True:
+        pass
