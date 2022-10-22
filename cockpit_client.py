@@ -15,7 +15,6 @@ MSFS_LED = 22
 MSFS_BTN = 4
 WS_URL = "ws://192.168.1.30:8765"
 
-GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(TV_BTN, GPIO.IN)
 GPIO.setup(PC_BTN, GPIO.IN)
@@ -83,17 +82,21 @@ async def send_message(message):
     try:
         async with websockets.connect(WS_URL, open_timeout=2, close_timeout=1) as websocket:
             await websocket.send(message)
-            print('DONE ')
             return True
     except:
-        print('ERROR ')
         return False
 
 
 # Main
 if __name__ == "__main__":
-    GPIO.add_event_detect(TV_BTN, GPIO.FALLING, callback=toggle_tv, bouncetime=1000)
-    GPIO.add_event_detect(PC_BTN, GPIO.FALLING, callback=toggle_pc, bouncetime=1000)
-    GPIO.add_event_detect(MSFS_BTN, GPIO.FALLING, callback=toggle_msfs, bouncetime=1000)
-    while True:
-        pass
+    try:
+        GPIO.add_event_detect(TV_BTN, GPIO.RISING, callback=toggle_tv, bouncetime=1000)
+        GPIO.add_event_detect(PC_BTN, GPIO.RISING, callback=toggle_pc, bouncetime=1000)
+        GPIO.add_event_detect(MSFS_BTN, GPIO.RISING, callback=toggle_msfs, bouncetime=1000)
+        while True:
+            pass
+    except:
+        logging.error("Main loop stopped")
+    finally:
+        logging.error("Cleaning up GPIO")
+        GPIO.cleanup()

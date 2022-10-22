@@ -30,7 +30,11 @@
 - nansp user is automatically connected 
  
 ## Web sockets events:
-| Command     | Description        |
-|-------------|--------------------|
-| START_MSFS  | *Starts MSFS*      |
-| STOP_PC | *Shutdowns the PC* |
+| Command     | Description              |
+|-------------|--------------------------|
+| TOGGLE_MSFS | *Toggles MSFS on or off* |
+| STOP_PC     | *Shutdowns the PC*       |
+
+## TODO List
+ - Repair broadlink mini connection
+ - Toggle off MSFS
