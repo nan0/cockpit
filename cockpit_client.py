@@ -6,6 +6,7 @@ import RPi.GPIO as GPIO
 import broadlink
 import websockets
 from wakeonlan import send_magic_packet
+import sys
 
 TV_LED = 17
 TV_BTN = 2
@@ -103,4 +104,19 @@ def main():
         GPIO.cleanup()
 
 
-main()
+if len(sys.argv) == 1:
+    main()
+else:
+    # CLI interactions
+    if sys.argv[1] == "toggle":
+        arg = sys.argv[2]
+        if arg == "tv":
+            toggle_tv(None)
+        elif arg == "pc":
+            toggle_pc(None)
+        elif arg == "msfs":
+            toggle_msfs(None)
+        else:
+            raise "Actions target available: [tv,pc,msfs]"
+    else:
+        raise "Actions available: [toggle]"

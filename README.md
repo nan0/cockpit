@@ -44,5 +44,12 @@
 | TOGGLE_MSFS | *Toggles MSFS on or off* |
 | STOP_PC     | *Shutdowns the PC*       |
 
+## CLI
+To use the commands in "one shot", a CLI is available for every action.
+
+```sudo python3 cockpit_client.py toggle [tv|pc|msfs]```
+
+Without argument, the script will serve and listen to the Pi GPIO.
+
 ## TODO List
  - Stop / Start MSFS with [steamcmd](https://developer.valvesoftware.com/wiki/SteamCMD)
