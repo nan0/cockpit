@@ -8,32 +8,41 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-pids = []
+msfs_running = False
 
 
 # Starts MSFS and all its related programs
 def toggle_MSFS():
-    logging.info('Starting MSFS...')
-    global pids
-    if pids is None:
-        pids = []
-        # r"C:\Program Files\MSFS2020 Map Enhancement\MSFS2020 Map Enhancement.exe",
-        appPaths = [
-            r"C:\Users\nansp\Desktop\SDVfrSimLinkerNext.exe",
+    global msfs_running
+    if not msfs_running:
+        logging.info('Starting MSFS...')
+
+        mods = [
             r"C:\Program Files\Air Manager\Bootloader.exe",
+            r"C:\Program Files (x86)\FSRealistic\FSRealistic.exe",
             r"D:\msfs\Community\touchingcloud-tools-kineticassistant\Kinetic Assistant.exe",
-            r"D:\SteamLibrary\steamapps\common\MicrosoftFlightSimulator\FlightSimulator.exe"]
-        for app in appPaths:
-            try:
-                pid = subprocess.Popen(app, shell=True)
-                pids.append(pid)
-            except OSError as e:
-                logging.warning("Execution failed:", e, file=sys.stderr)
+            r"C:\Users\nansp\cockpit\SDVfrSimLinkerNext.exe",
+            r"C:\Program Files\MSFS2020 Map Enhancement\MSFS2020 Map Enhancement.exe",
+        ]
+
+        for mod in mods:
+            subprocess.Popen(mod, shell=True)
+
+        # Removing the MSFS lock file that shows the warning on startup
+        lock_file = "C:\\Users\\nansp\\AppData\\Roaming\\Microsoft Flight Simulator\\running.lock"
+        if os.path.isfile(lock_file):
+            os.remove(lock_file)
+
+        # Starting MSFS through steam (also avoids the warning message)
+        os.system("start \"\" steam://rungameid/1250410")
+        msfs_running = True
     else:
-        logging.info('Killing MSFS...')
-        for process in pids:
-            process.kill()
-        pids = None
+        logging.info('Stopping MSFS...')
+        processNames = ["SDVfrSimLinkerNext.exe", "javaw.exe", "Kinetic Assistant.exe",
+                        "FlightSimulator.exe", "FSRealistic.exe", "MSFS2020 Map Enhancement.exe"]
+        for process in processNames:
+            os.system('taskkill /f /im  "' + process + '"')
+        msfs_running = False
 
 
 # Shuts down the PC
@@ -45,7 +54,6 @@ def stop_PC():
 # Handles every command
 async def handle_command(websocket):
     async for cmd in websocket:
-        logging.debug(cmd)
         if cmd == 'TOGGLE_MSFS':
             toggle_MSFS()
         elif cmd == 'STOP_PC':
@@ -59,5 +67,4 @@ async def main():
         await asyncio.Future()  # run forever
 
 
-if __name__ == '__main__':
-    asyncio.run(main())
+asyncio.run(main())

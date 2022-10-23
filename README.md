@@ -25,7 +25,10 @@
 
 ## Gaming PC Configuration
 - python server located in startup scripts (windows+r and shell:startup)
-- starts automatically when user session starts
+- Task Scheduler will start automatically the python server
+  - Task name : "Start cockpit"
+  - To open task scheduler : win + r / taskschd.msc
+  - The task is visible in the "Display active tasks" dection
 - Incoming / Outgoing port 8765 open in windows firewall
 - nansp user is automatically connected 
  
@@ -37,4 +40,3 @@
 
 ## TODO List
  - Repair broadlink mini connection
- - Toggle off MSFS

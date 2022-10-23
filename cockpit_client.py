@@ -48,13 +48,13 @@ def toggle_pc(channel):
     is_up = asyncio.run(send_message('DUMMY'))
     if not is_up:
         logging.info("PC is off. Starting it...")
-        blink_led(PC_LED, 1)
         mac_addr = '50:EB:F6:94:53:01'
         send_magic_packet(mac_addr)
+        blink_led(PC_LED, 1)
     else:
         logging.info("PC is on. Stopping it...")
-        blink_led(PC_LED, 1)
         asyncio.run(send_message('STOP_PC'))
+        blink_led(PC_LED, 1)
 
 
 # Sends a message to make the server toggle MSFS
@@ -88,7 +88,7 @@ async def send_message(message):
 
 
 # Main
-if __name__ == "__main__":
+def main():
     try:
         GPIO.add_event_detect(TV_BTN, GPIO.RISING, callback=toggle_tv, bouncetime=1000)
         GPIO.add_event_detect(PC_BTN, GPIO.RISING, callback=toggle_pc, bouncetime=1000)
@@ -100,3 +100,6 @@ if __name__ == "__main__":
     finally:
         logging.error("Cleaning up GPIO")
         GPIO.cleanup()
+
+
+main()
