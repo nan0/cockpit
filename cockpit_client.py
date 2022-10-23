@@ -14,6 +14,8 @@ PC_BTN = 3
 MSFS_LED = 22
 MSFS_BTN = 4
 WS_URL = "ws://192.168.1.30:8765"
+BROADLINK_IP = "192.168.1.33"
+PC_MAC_ADDR = '50:EB:F6:94:53:01'
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(TV_BTN, GPIO.IN)
@@ -32,7 +34,7 @@ def toggle_tv(channel):
     blink_led(TV_LED)
 
     # Broadlink RM3 mini connexion
-    device = broadlink.hello('192.168.1.15')
+    device = broadlink.hello(BROADLINK_IP)
     device.auth()
     with open("./tv_switch", "rb") as f:  # reading the tv on/off packet from the related file
         packet = f.read()
@@ -48,8 +50,7 @@ def toggle_pc(channel):
     is_up = asyncio.run(send_message('DUMMY'))
     if not is_up:
         logging.info("PC is off. Starting it...")
-        mac_addr = '50:EB:F6:94:53:01'
-        send_magic_packet(mac_addr)
+        send_magic_packet(PC_MAC_ADDR)
         blink_led(PC_LED, 1)
     else:
         logging.info("PC is on. Stopping it...")

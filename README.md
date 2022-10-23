@@ -30,7 +30,13 @@
   - To open task scheduler : win + r / taskschd.msc
   - The task is visible in the "Display active tasks" dection
 - Incoming / Outgoing port 8765 open in windows firewall
-- nansp user is automatically connected 
+- nansp user is automatically connected
+
+## Broadlink configuration
+ - Using the [repo's](https://github.com/mjg59/python-broadlink) doc works fine 
+ - Connect the broadlink to the wifi network with the Android app
+ - / ! \ Unlock the RM3 from the app, otherwise the auth() function will not work. Toggle the related switch in the device properties
+ - Follow the documenttion to learn and discover devices
  
 ## Web sockets events:
 | Command     | Description              |
