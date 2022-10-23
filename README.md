@@ -45,4 +45,4 @@
 | STOP_PC     | *Shutdowns the PC*       |
 
 ## TODO List
- - Repair broadlink mini connection
+ - Stop / Start MSFS with [steamcmd](https://developer.valvesoftware.com/wiki/SteamCMD)
